@@ -102,6 +102,24 @@ class AdditionalDetailsNormalizerTest extends TestCase
         ], $result);
     }
 
+    public function testNormalizeWithOptionalAddresses(): void
+    {
+        $this->setupRequest();
+
+        $order = OrderMother::createForNormalization();
+        $order->setBillingAddress(null);
+        $order->setShippingAddress(null);
+
+        /** @var array<string, null|array|string> $result */
+        $result = $this->normalizer->normalize($order);
+
+        $this->assertArrayHasKey('billingAddress', $result);
+        $this->assertNull($result['billingAddress']);
+
+        $this->assertArrayHasKey('deliveryAddress', $result);
+        $this->assertNull($result['deliveryAddress']);
+    }
+
     private function setupShippingLine(): void
     {
         $this->shippingLineGenerator
