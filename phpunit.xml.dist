@@ -8,6 +8,10 @@
         <testsuite name="BitBagSyliusAdyenPlugin Test Suite">
             <directory>tests</directory>
         </testsuite>
+
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
     </testsuites>
 
     <php>

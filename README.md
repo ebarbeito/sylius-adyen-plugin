@@ -151,8 +151,11 @@ We know that your money is valuable, so we designed this plug-in to change the p
 
 ## Testing
 ----
-```
-$ composer install
+
+### Running all the test suites
+
+```shell
+$ XDEBUG_MODE=off composer install
 $ cd tests/Application
 $ bin/console assets:install -e test
 $ bin/console doctrine:database:create -e test
@@ -163,6 +166,13 @@ $ yarn gulp
 $ bin/console server:run 127.0.0.1:8080 -e test
 $ bin/phpunit
 $ bin/behat
+```
+
+### Run only the Unit test suite
+
+```shell
+$ XDEBUG_MODE=off composer install
+$ XDEBUG_MODE=off php -dmemory_limit=-1 ./vendor/bin/phpunit --bootstrap tests/Unit/bootstrap.php --testsuite Unit
 ```
 
 # About us
