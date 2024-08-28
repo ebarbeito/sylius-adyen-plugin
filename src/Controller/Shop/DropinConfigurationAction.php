@@ -74,7 +74,7 @@ class DropinConfigurationAction
         Assert::isArray($config);
 
         $billingAddress = $order->getBillingAddress();
-        Assert::isInstanceOf($billingAddress, AddressInterface::class);
+        Assert::nullOrIsInstanceOf($billingAddress, AddressInterface::class);
 
         $pathParams = [
             'code' => $code,
@@ -82,14 +82,7 @@ class DropinConfigurationAction
         ];
 
         return new JsonResponse([
-            'billingAddress' => [
-                'firstName' => $billingAddress->getFirstName(),
-                'lastName' => $billingAddress->getLastName(),
-                'countryCode' => $billingAddress->getCountryCode(),
-                'province' => $billingAddress->getProvinceName() ?? $billingAddress->getProvinceCode(),
-                'city' => $billingAddress->getCity(),
-                'postcode' => $billingAddress->getPostcode(),
-            ],
+            'billingAddress' => self::billingAddressToArray($billingAddress),
             'paymentMethods' => $config['paymentMethods'],
             'clientKey' => $config['clientKey'],
             'locale' => $order->getLocaleCode(),
@@ -133,12 +126,8 @@ class DropinConfigurationAction
             }
         }
 
-        /**
-         * @var ?OrderInterface $result
-         */
-        $result = $order;
-
-        return $result;
+        /** @var ?OrderInterface $order */
+        return $order;
     }
 
     private function getResponseForDroppedOrder(Request $request): JsonResponse
@@ -165,5 +154,27 @@ class DropinConfigurationAction
                 'tokenValue' => $tokenValue,
             ]),
         ]);
+    }
+
+    /**
+     * @return array{
+     *     firstName: string|null,
+     *     lastName: string|null,
+     *     countryCode: string|null,
+     *     province: string|null,
+     *     city: string|null,
+     *     postcode: string|null
+     * }
+     */
+    private static function billingAddressToArray(?AddressInterface $address): array
+    {
+        return [
+            'firstName' => $address ? $address->getFirstName() : null,
+            'lastName' => $address ? $address->getLastName() : null,
+            'countryCode' => $address ? $address->getCountryCode() : null,
+            'province' => $address ? ($address->getProvinceName() ?? $address->getProvinceCode()) : null,
+            'city' => $address ? $address->getCity() : null,
+            'postcode' => $address ? $address->getPostcode() : null,
+        ];
     }
 }

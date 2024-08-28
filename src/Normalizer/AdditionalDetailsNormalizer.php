@@ -64,6 +64,18 @@ final class AdditionalDetailsNormalizer extends AbstractPaymentNormalizer implem
         );
     }
 
+    /**
+     * @param object|null $object
+     */
+    private function normalizeInternalOptionalStructure($object): ?array
+    {
+        if (null === $object) {
+            return null;
+        }
+
+        return $this->normalizeInternalStructure($object);
+    }
+
     private function getLineItems(OrderInterface $order): array
     {
         $result = [];
@@ -76,7 +88,7 @@ final class AdditionalDetailsNormalizer extends AbstractPaymentNormalizer implem
     }
 
     /**
-     * @param mixed $object
+     * @param OrderInterface $object
      */
     public function normalize(
         $object,
@@ -92,17 +104,17 @@ final class AdditionalDetailsNormalizer extends AbstractPaymentNormalizer implem
         Assert::isInstanceOf($request, Request::class);
 
         $billingAddress = $object->getBillingAddress();
-        Assert::isInstanceOf($billingAddress, AddressInterface::class);
+        Assert::nullOrIsInstanceOf($billingAddress, AddressInterface::class);
 
         $shippingAddress = $object->getShippingAddress();
-        Assert::isInstanceOf($shippingAddress, AddressInterface::class);
+        Assert::nullOrIsInstanceOf($shippingAddress, AddressInterface::class);
 
         $lineItems = $this->getLineItems($object);
         $lineItems[] = $this->shippingLineGenerator->generate($lineItems, $object);
 
         return [
-            'billingAddress' => $this->normalizeInternalStructure($billingAddress),
-            'deliveryAddress' => $this->normalizeInternalStructure($shippingAddress),
+            'billingAddress' => $this->normalizeInternalOptionalStructure($billingAddress),
+            'deliveryAddress' => $this->normalizeInternalOptionalStructure($shippingAddress),
             'lineItems' => $lineItems,
             'shopperEmail' => (string) $customer->getEmail(),
             'shopperName' => [
@@ -110,7 +122,7 @@ final class AdditionalDetailsNormalizer extends AbstractPaymentNormalizer implem
                 'lastName' => $customer->getLastName(),
             ],
             'shopperIP' => $request->getClientIp(),
-            'telephoneNumber' => $billingAddress->getPhoneNumber(),
+            'telephoneNumber' => $billingAddress?->getPhoneNumber(),
         ];
     }
 
